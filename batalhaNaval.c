@@ -1,50 +1,84 @@
 #include <stdio.h>
 
-int main() {
-    int tamanho = 10;  // Tamanho do tabuleiro
-    int navio = 3;     // Tamanho do navio
-    int tabuleiro[10][10]; // Matriz do tabuleiro
+#define TAMANHO 10
+#define NAVIO 3
+#define AFETADO 5
 
-    // Inicializa o tabuleiro preenchendo com 0 (água)
-    for (int i = 0; i < tamanho; i++) {
-        for (int j = 0; j < tamanho; j++) {
+void inicializarTabuleiro(int tabuleiro[TAMANHO][TAMANHO]) {
+    for (int i = 0; i < TAMANHO; i++) {
+        for (int j = 0; j < TAMANHO; j++) {
             tabuleiro[i][j] = 0;
         }
     }
+}
 
-    // Posicionando 4 navios:
-    // 1. Navio horizontal (linha 2, começando na coluna 1)
-    int linha_horizontal = 2, coluna_horizontal = 1;
-    for (int i = 0; i < navio; i++) {
-        tabuleiro[linha_horizontal][coluna_horizontal + i] = 3;
+void posicionarNavios(int tabuleiro[TAMANHO][TAMANHO]) {
+    int linha_h = 2, coluna_h = 1;
+    for (int i = 0; i < NAVIO; i++) tabuleiro[linha_h][coluna_h + i] = 3;
+
+    int linha_v = 5, coluna_v = 6;
+    for (int i = 0; i < NAVIO; i++) tabuleiro[linha_v + i][coluna_v] = 3;
+
+    int linha_d1 = 1, coluna_d1 = 4;
+    for (int i = 0; i < NAVIO; i++) tabuleiro[linha_d1 + i][coluna_d1 + i] = 3;
+
+    int linha_d2 = 7, coluna_d2 = 5;
+    for (int i = 0; i < NAVIO; i++) tabuleiro[linha_d2 - i][coluna_d2 + i] = 3;
+}
+
+void aplicarCone(int tabuleiro[TAMANHO][TAMANHO], int x, int y) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = -i; j <= i; j++) {
+            int nx = x + i, ny = y + j;
+            if (nx >= 0 && nx < TAMANHO && ny >= 0 && ny < TAMANHO && tabuleiro[nx][ny] != 3) {
+                tabuleiro[nx][ny] = AFETADO;
+            }
+        }
     }
+}
 
-    // 2. Navio vertical (coluna 6, começando na linha 5)
-    int linha_vertical = 5, coluna_vertical = 6;
-    for (int i = 0; i < navio; i++) {
-        tabuleiro[linha_vertical + i][coluna_vertical] = 3;
+void aplicarCruz(int tabuleiro[TAMANHO][TAMANHO], int x, int y) {
+    for (int i = -2; i <= 2; i++) {
+        if (x + i >= 0 && x + i < TAMANHO && tabuleiro[x + i][y] != 3) {
+            tabuleiro[x + i][y] = AFETADO;
+        }
+        if (y + i >= 0 && y + i < TAMANHO && tabuleiro[x][y + i] != 3) {
+            tabuleiro[x][y + i] = AFETADO;
+        }
     }
+}
 
-    // 3. Navio diagonal ↘ (diagonal crescente, começando em 1,4)
-    int linha_diag1 = 1, coluna_diag1 = 4;
-    for (int i = 0; i < navio; i++) {
-        tabuleiro[linha_diag1 + i][coluna_diag1 + i] = 3;
+void aplicarOctaedro(int tabuleiro[TAMANHO][TAMANHO], int x, int y) {
+    for (int i = -1; i <= 1; i++) {
+        for (int j = -1; j <= 1; j++) {
+            if (x + i >= 0 && x + i < TAMANHO && y + j >= 0 && y + j < TAMANHO && tabuleiro[x + i][y + j] != 3) {
+                tabuleiro[x + i][y + j] = AFETADO;
+            }
+        }
     }
+}
 
-    // 4. Navio diagonal ↙ (diagonal decrescente, começando em 7,5)
-    int linha_diag2 = 7, coluna_diag2 = 5;
-    for (int i = 0; i < navio; i++) {
-        tabuleiro[linha_diag2 - i][coluna_diag2 + i] = 3;
-    }
-
-    // Exibe o tabuleiro no console
-    printf("Tabuleiro de Batalha Naval:\n");
-    for (int i = 0; i < tamanho; i++) {
-        for (int j = 0; j < tamanho; j++) {
+void exibirTabuleiro(int tabuleiro[TAMANHO][TAMANHO]) {
+    printf("\nTabuleiro de Batalha Naval:\n");
+    for (int i = 0; i < TAMANHO; i++) {
+        for (int j = 0; j < TAMANHO; j++) {
             printf("%d ", tabuleiro[i][j]);
         }
         printf("\n");
     }
+}
+
+int main() {
+    int tabuleiro[TAMANHO][TAMANHO];
+    
+    inicializarTabuleiro(tabuleiro);
+    posicionarNavios(tabuleiro);
+    
+    aplicarCone(tabuleiro, 3, 3);
+    aplicarCruz(tabuleiro, 6, 6);
+    aplicarOctaedro(tabuleiro, 8, 2);
+    
+    exibirTabuleiro(tabuleiro);
 
     return 0;
 }
